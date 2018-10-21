@@ -7,7 +7,7 @@
     "build": "tsc -p tsconfig.json",
     "test": "node ./test/test.js"
   },
-  "author": "uioz",
+  "author": "hzxbpld@163.com",
   "license": "MIT",
   "dependencies": {
     "@types/node": "^10.12.0",
