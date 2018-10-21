@@ -1,0 +1,21 @@
+{
+  "name": "asyncrequest-simple",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "uioz",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^10.12.0",
+    "@types/request": "^2.47.1",
+    "@types/request-promise": "^4.1.42",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2"
+  },
+  "devDependencies": {
+    "typescript": "^3.1.3"
+  }
+}
