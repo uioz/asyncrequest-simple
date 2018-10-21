@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "",
   "main": "./dist/asyncrequest-simple.js",
+  "types":"./src/asyncrequest-simple.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "node ./test/test.js"
