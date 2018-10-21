@@ -38,19 +38,15 @@ npm install
 入口文件使用:
 - 构建版本
 ```
-const {asyncRequestSimple} = require('./dist/asyncrequest-simple.js');
+const {AsyncRequestSimple} = require('./dist/asyncrequest-simple.js');
 
 // OR
 
-const a = require('./dist/asyncrequest-simple.js').default;
+const a = require('./dist/asyncrequest-simple.js').AsyncRequestSimple;
 ```
 - TypeScript版本
 ```
-import asyncRequestSimple from './src/asyncrequest-simple';
-
-// OR
-
-import {asyncRequestSimple} from './src/asyncrequest-simple';
+import {AsyncRequestSimple} from './src/asyncrequest-simple';
 ```
 
 ## 初始化
@@ -148,7 +144,7 @@ interface options {
 ```
 /**
  * 标准任务接口
- * 
+ *
  * - 泛型参数
  *   - T 指定解析函数返回的类型,如果没有解析函数,类型设置和K一致
  *   - K 指定解析函数接受的类型(请求返回的类型)
@@ -182,16 +178,16 @@ interface Task<T, K> extends parseFuncction<T, K> {
 ```
    /**
      * 将任务元素压入内部的请求队列中,内部的将这些任务进行乱序请求
-     * 
+     *
      * 当同一组完成后则触发Promise回调,返回的任务不保证顺序
-     * 
+     *
      * - 警告
      *   - 使用前需要调用checkCachedTaskSpace检查是否有剩余空间,否则会报没有剩余空间错误
-     * 
+     *
      * - 泛型参数
      *   - responseType 请求返回的类型
      *   - successType 解析成功的类型-如果没有解析函数类型需要设置和responseType一致
-     * 
+     *
      * - 返回类型
      *   返回一个Promise,Promise.then返回一个数组格式为[successType[],string[]]第一个数组包含所有的正确解析的内容,第二包含所有错误的内容
      * @param task 一组或者一个任务
@@ -206,10 +202,3 @@ pushTask<responseType, successType>(task: Task<successType, responseType> | Task
 ## 起手和测试
 
 在test文件夹中的test.js中有该项目的使用测试,你可以在那里获取他的简单使用.
-
-
-
-
-
-
-

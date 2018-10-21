@@ -35,7 +35,7 @@ function getRootPath(path) {
  * @param configOrigin 配置源如果是路径则从该路径中读取,如果是对象则直接使用
  * @param requestOptions 请求的配置
  */
-async function asyncrequestsimple(configOrigin, requestOptions) {
+async function AsyncRequestSimple(configOrigin, requestOptions) {
     let config;
     if (typeof configOrigin == 'string') {
         config = await getConfig(configOrigin);
@@ -59,14 +59,5 @@ async function asyncrequestsimple(configOrigin, requestOptions) {
     }
     return new requestManagerCore_1.RequestManagerPlusPlus(standardRequestModuleInstance, requestOptions);
 }
-exports.default = asyncrequestsimple;
+exports.AsyncRequestSimple = AsyncRequestSimple;
 ;
-/**
- * 批量请求管理器返回一个Promise,提供一个pushTask方法用于添加请求任务
- *
- * 该任务的格式需要符合本文件提供的Task接口要求
- *
- * @param configOrigin 配置源如果是路径则从该路径中读取,如果是对象则直接使用
- * @param requestOptions 请求的配置
- */
-exports.asyncRequestSimple = asyncrequestsimple;
