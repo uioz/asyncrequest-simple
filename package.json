@@ -1,9 +1,9 @@
 {
   "name": "asyncrequest-simple",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "./dist/asyncrequest-simple.js",
-  "types":"./src/asyncrequest-simple.ts",
+  "types": "./src/asyncrequest-simple.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "node ./test/test.js"
