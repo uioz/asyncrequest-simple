@@ -7,11 +7,18 @@
     "build": "tsc -p tsconfig.json",
     "test": "node ./test/test.js"
   },
-  "author": "hzxbpld@163.com",
+  "author": {
+    "name": "uioz",
+    "email": "hzxbpld@163.com"
+  },
   "license": "MIT",
   "dependencies": {
     "request": "^2.88.0",
     "request-promise": "^4.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uioz/asyncrequest-simple.git"
   },
   "devDependencies": {
     "@types/node": "^10.12.0",
