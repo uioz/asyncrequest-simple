@@ -37,6 +37,9 @@ async function getConfig(configPath:string) {
 }
 
 function getRootPath(path:{linux?:string,win?:string}):string {
+    if(!path){
+        return '';
+    }
     let result = process.cwd();
     if(process.platform == 'win32'){
         result = path.win;

@@ -405,12 +405,12 @@ class RequestManagerPlusPlus extends RequestManagerBase {
         const parseFunction = task.parseFunction, that = this, id = task.id;
         function then(htmlString) {
             if (parseFunction) {
-                const result = parseFunction(htmlString);
-                if (result) {
+                try {
+                    const result = parseFunction(htmlString);
                     that.pushTaskDoneMap(id, result, 'success');
                 }
-                else {
-                    that.pushTaskDoneMap(id, `Error:解析错误! 任务内容:${task},解析函数:${parseFunction}.`, 'error');
+                catch (error) {
+                    that.pushTaskDoneMap(id, `Error:解析错误! 任务内容:${task},解析函数:${parseFunction},错误信息:error.`, 'error');
                 }
             }
             else {

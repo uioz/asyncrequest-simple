@@ -21,6 +21,16 @@
 
 **注意**:个人项目不保证稳定性.
 
+# 安装和使用
+
+```
+git clone https://github.com/uioz/asyncrequest-simple
+
+cd asyncrequest-simple
+
+npm install
+```
+
 # api
 
 由于使用TypeScript这里直接提供定义的类型文件即可.
@@ -28,7 +38,7 @@
 入口文件使用:
 - 构建版本
 ```
-const asyncRequestSimple = require('./dist/asyncrequest-simple.js');
+const {asyncRequestSimple} = require('./dist/asyncrequest-simple.js');
 
 // OR
 
@@ -93,7 +103,7 @@ interface configs {
 ```
 该配置可以保存到文件中如果想使用外部配置则直接传入文件的绝对路径即可这也是返回Promise的原因.
 
-同时该现象也支持传入对象格式和外部文件格式一致,这个时候操作就是同步的了,可以利用`Promise.reject(AsyncRequestSimple())`转为同步操作.
+同时该选项也支持传入对象,该对象的格式需要和外部文件格式一致.
 
 - 请求配置
 
@@ -128,7 +138,7 @@ interface options {
     maxTaskCache?: number;
 }
 ```
-这个选项可以不传入,个人觉得`requestTimeoutByhost`还是可以使用的.
+这个选项可以不传入,需要注意的是这里的`requestTimeoutByhost`会覆盖配置文件中的`requestTimeoutByhost`.
 
 ## 使用
 
