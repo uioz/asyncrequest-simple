@@ -3,6 +3,7 @@ import { LoadJson } from "./lib/loadjson";
 import { requestPackage } from "./requestpackage";
 import { RequestLoader } from "./requestloader";
 import { requsetMoudleList } from "./requestInstance";
+import { hostNameConfig } from './types';
 
 export { Task } from './requestManagerCore'
 
@@ -11,7 +12,9 @@ export { Task } from './requestManagerCore'
  */
 export interface configs {
     ["module"]: Array<string>;
-    ["hostConfigs"]?: object;
+    ["hostConfigs"]?: {
+        ['hostName']:hostNameConfig
+    }
     ["proxy"]?: string;
     ["requestTimeoutByHost"]?:{
         [hostName:string]:number;
@@ -88,30 +91,13 @@ export default async function asyncrequestsimple(configOrigin:string|configs,req
     return new RequestManagerPlusPlus(standardRequestModuleInstance,requestOptions);
 };
 
+/**
+ * 批量请求管理器返回一个Promise,提供一个pushTask方法用于添加请求任务
+ * 
+ * 该任务的格式需要符合本文件提供的Task接口要求
+ * 
+ * @param configOrigin 配置源如果是路径则从该路径中读取,如果是对象则直接使用
+ * @param requestOptions 请求的配置
+ */
 export const asyncRequestSimple = asyncrequestsimple;
 
-
-
-// test start 
-
-
-// async function test() {
-//     const path = '/media/zhao/164EB6A04EB67857/html/electronproject/electronbuildforlinux/config/myconfig.json';
-//     let requestManger = await requestManagerV3(path);
-
-//     const taskA:Task<string,string> = {
-//         taskName:'demo',
-//         useModuleName:'request-promise',
-//         hostName:'onejav.com',
-//         proxy:true
-//     }
-
-
-//     let result = await requestManger.pushTask(taskA);
-
-//     console.log(result);
-    
-// }
-// test();
-
-// test end

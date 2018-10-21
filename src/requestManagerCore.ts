@@ -25,7 +25,7 @@ interface parseFuncction<T, k> {
  *   - K 指定解析函数接受的类型(请求返回的类型)
  */
 export interface Task<T, K> extends parseFuncction<T, K> {
-    // 任务的唯一标识
+    // 任务的唯一标识同任务组内不可有重复的任务名称(注意)否则内部会出错,内部不会进行校验.
     taskName: any;
     // 使用的请求模块
     useModuleName: string;
@@ -797,6 +797,7 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
      *   - successType 解析成功的类型-如果没有解析函数类型需要设置和responseType一致
      * 
      * - 返回类型
+     *   返回一个Promise,Promise.then返回一个数组格式为[successType[],string[]]第一个数组包含所有的正确解析的内容,第二包含所有错误的内容
      * @param task 一组或者一个任务
      */
     pushTask<responseType, successType>(task: Task<successType, responseType> | Task<successType, responseType>[]): Promise<responseArray<successType>> {

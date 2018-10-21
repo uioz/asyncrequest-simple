@@ -474,6 +474,7 @@ class RequestManagerPlusPlus extends RequestManagerBase {
      *   - successType 解析成功的类型-如果没有解析函数类型需要设置和responseType一致
      *
      * - 返回类型
+     *   返回一个Promise,Promise.then返回一个数组格式为[successType[],string[]]第一个数组包含所有的正确解析的内容,第二包含所有错误的内容
      * @param task 一组或者一个任务
      */
     pushTask(task) {

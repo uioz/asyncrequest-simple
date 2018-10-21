@@ -2,8 +2,8 @@
  * host配置实现指引
  */
 export type hostNameConfig = {
+    url: string;
     headers?: object;
-    baseUrl?: string;
     proxy?: string;
     query?:any;
 }
@@ -281,7 +281,7 @@ export interface requestCheck {
  *   - moduleConfig 该泛型规定主机格式
  *   - requestModuleType 该泛型规定了请求模块的类型
  */
-export abstract class BaseRequest<hostConfig> {
+export abstract class BaseRequest<hostConfig extends hostNameConfig> {
 
     protected standardConfig: standardConfig<hostConfig>;
     protected requestModule: any;
