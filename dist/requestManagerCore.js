@@ -165,21 +165,48 @@ class RequestManagerPlusPlus extends RequestManagerBase {
         }
         this.TaskCacheMap.set(task.id, result);
     }
-    pushTaskDoneMap(id, result, type) {
-        const handle = this.TaskDoneMap;
-        let initArray = [[], []];
-        if (handle.has(id)) {
-            initArray = handle.get(id);
+    pushTaskDoneMap(id, task) {
+        function isSuccessType(x) {
+            return !!x.result;
+        }
+        const mapHandle = this.TaskDoneMap;
+        let InitArray = [[], []];
+        if (mapHandle.has(id)) {
+            InitArray = mapHandle.get(id);
         }
         else {
-            handle.set(id, initArray);
+            mapHandle.set(id, InitArray);
         }
-        if (type == 'success') {
-            initArray[0].push(result);
+        if (isSuccessType(task)) {
+            InitArray[0].push(task);
         }
         else {
-            initArray[1].push(result);
+            InitArray[1].push(task);
         }
+    }
+    pushSuccessTask(task, result) {
+        function mixin(task) {
+            return {
+                taskName: task.taskName,
+                hostName: task.hostName,
+                result: result,
+                query: task.query,
+                queryUrl: task.queryUrl
+            };
+        }
+        this.pushTaskDoneMap(task.id, mixin(task));
+    }
+    pushErrorTask(task, result) {
+        function mixin(task) {
+            return {
+                taskName: task.taskName,
+                hostName: task.hostName,
+                error: result,
+                query: task.query,
+                queryUrl: task.queryUrl
+            };
+        }
+        this.pushTaskDoneMap(task.id, mixin(task));
     }
     /**
      * 修改缓存Map中所有任务的总数
@@ -389,12 +416,7 @@ class RequestManagerPlusPlus extends RequestManagerBase {
                 module.useQuery(task.query);
             }
             if (task.proxy) {
-                if (typeof task.proxy == 'string') {
-                    module.setProxy(task.proxy);
-                }
-                else {
-                    module.setProxy();
-                }
+                module.setProxy();
             }
             if (task.options) {
                 module.setRequestOption(task.options);
@@ -402,29 +424,32 @@ class RequestManagerPlusPlus extends RequestManagerBase {
             return module;
         }
         settingModule(task, module);
-        const parseFunction = task.parseFunction, that = this, id = task.id;
-        function then(htmlString) {
-            if (parseFunction) {
-                try {
-                    const result = parseFunction(htmlString);
-                    that.pushTaskDoneMap(id, result, 'success');
-                }
-                catch (error) {
-                    that.pushTaskDoneMap(id, `Error:解析错误! 任务内容:${task},解析函数:${parseFunction},错误信息:error.`, 'error');
-                }
-            }
-            else {
-                that.pushTaskDoneMap(id, htmlString, 'success');
-            }
+        const parseFunction = task.parseFunction, that = this;
+        function done() {
+            // 重置模块信息
             module.useHostConfig(hostName);
             // 触发内容完成
             that.emit('done', task);
         }
+        function then(data) {
+            try {
+                let result = parseFunction ? parseFunction(data) : undefined;
+                if (result === false) {
+                    that.pushErrorTask(task, `Error:解析错误! 解析函数:${parseFunction}`);
+                    done();
+                    return;
+                }
+                that.pushSuccessTask(task, data);
+                done();
+            }
+            catch (error) {
+                that.pushErrorTask(task, `Error:解析器错误! 错误信息:${error}`);
+                done();
+            }
+        }
         function error(error) {
-            that.pushTaskDoneMap(id, `Error:请求错误! ${error}`, 'error');
-            module.useHostConfig(hostName);
-            // 触发内容完成
-            that.emit('done', task);
+            that.pushErrorTask(task, `Error:请求错误! ${error}`);
+            done();
         }
         module.request().then(then).catch(error);
     }

@@ -3,7 +3,7 @@ import {
     standardRequset,
     likePromise,
 } from './types'
-import requestPromise = require('request-promise');
+const requestPromise = require('request-promise');
 
 /**
  * 本请求模块的host配置

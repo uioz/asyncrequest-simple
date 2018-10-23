@@ -45,6 +45,67 @@ export interface Task<T, K> extends parseFuncction<T, K> {
 }
 
 /**
+ * RequestManager返回解析成功类型
+ * 
+ * - 泛型参数
+ *   - T 成功后返回的类型和解析后返回的类型(如有解析函数)
+ */
+interface responseSuccess<T> {
+    result: T;
+}
+
+/**
+ * RequestManager返回解析失败类型
+ * 
+ * - 泛型参数
+ *   - T 成功后返回的类型,这也是解析函数返回的类型,如果没有解析函数,则需要设置类型和请求返回类型一致
+ */
+interface responseError {
+    error: string;
+}
+
+/**
+ * 该类型定义了返回的结果中应该有的信息.
+ */
+interface DoneTask {
+    taskName: string;
+    hostName: string;
+    query?: { [queryName: string]: string; };
+    queryUrl?: string[] | string;
+}
+
+/**
+ * 该类型定义了最终请求返回结果中的内容.
+ * 
+ * 除了拥有基本的任务DoneTask信息外还多了一个result属性用于保存请求完成的信息
+ * 
+ * - 泛型参数
+ *   - T 请求返回的类型,如果有设置了解析函数的类型则返回的类型应该和解析函数返回的类型保持一致.
+ *   - K 解析函数返回的类型,
+ */
+type successTask<T, K> = Exclude<DoneTask, Task<T, K>> & responseSuccess<T>;
+
+/**
+ * 该类型定义了最终请求返回结果中的内容
+ * 
+ * 除了拥有基本的任务DoneTask信息外还多了一个error属性用于保存请求失败的信息.
+ * 
+ * - 泛型参数
+ *   - T 请求返回的类型,如果有设置了解析函数的类型则返回的类型应该和解析函数返回的类型保持一致.
+ *   - K 解析函数返回的类型,
+ */
+type errorTask<T, K> = Exclude<DoneTask, Task<T, K>> & responseError;
+
+/**
+ * 该类型定义了PushTask返回的Promise的类型
+ * 
+ * 基本来说是一个二维数组,数组的第一个元素包含了所有请求成功的内容,
+ * - 下标0中包含所有请求成功的内容类型为successTask
+ * - 下标1中包含所有请求失败的内容类型为errorTask
+ */
+type responseContent<T,K> = [successTask<T,K>[],errorTask<T,K>[]];
+
+/**
  * Task在RequestManager中储存的类型
  * 
  * 由于该类型是储存在RequestManager内部的,所以不在乎原来Task中的泛型参数
@@ -61,42 +122,10 @@ interface TaskInRequestManager extends Task<any, any> {
 }
 
 /**
- * RequestManager返回解析成功类型
- * 
- * - 泛型参数
- *   - T 成功后返回的类型,这也是解析函数返回的类型,如果没有解析函数,则需要设置类型和请求返回类型一致
- *   - K 成功请求后返回的结果
- */
-interface responseSuccess<T, K> extends Task<T, K> {
-    success: T;
-}
-
-/**
- * RequestManager返回解析失败类型
- * 
- * - 泛型参数
- *   - T 成功后返回的类型,这也是解析函数返回的类型,如果没有解析函数,则需要设置类型和请求返回类型一致
- *   - K 成功请求后返回的结果
- */
-interface responseError<T, K> extends Task<T, K> {
-    error: string;
-}
-
-/**
- * 定义返回的类型数组格式
- * 
- * - string[]数组中存放着错误内容
- * 
- * - 泛型参数
- *   - T 使用解析函数返回的类型,没有解析函数就是返回内容的类型
- */
-type responseArray<T> = [T[], string[]];
-
-/**
  * 定义每个域名下间隔请求的触发时间
  */
 interface delayTriggerTimeByHost {
-    [hostName:string]:number;
+    [hostName: string]: number;
 }
 
 /**
@@ -122,7 +151,7 @@ export interface options {
     /**
      * 定义每个域名下的请求间隔时间数
      */
-    requestTimeoutByhost?:delayTriggerTimeByHost;
+    requestTimeoutByhost?: delayTriggerTimeByHost;
     /**
      * 任务队列最大缓存数,默认最大200
      */
@@ -205,7 +234,7 @@ abstract class RequestManagerBase extends EventEmitter {
     /**
      * 保存请求使用的模块
      */
-    protected modules:requsetMoudleList;
+    protected modules: requsetMoudleList;
 
     /**
      * 保存未请求任务
@@ -215,7 +244,7 @@ abstract class RequestManagerBase extends EventEmitter {
     /**
      * 保存已完成任务
      */
-    protected TaskDoneMap: Map<symbol, [responseSuccess<any, any>[], responseError<any, any>[]]> = new Map();
+    protected TaskDoneMap: Map<symbol, [[successTask<any, any>], [errorTask<any, any>]]> = new Map();
 
     /**
      * 自动设置配置选项
@@ -326,7 +355,7 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
             const runing = this.runingCounter;
 
             // 更新任务状态
-            this.setTaskStatus(task,'done');
+            this.setTaskStatus(task, 'done');
             // 剔除该任务从请求队列中
             runing.runingTaskQueue = runing.runingTaskQueue.filter(element => element.id != task.id || element.taskName != task.taskName);
             // 删除任务从缓存Map中
@@ -340,9 +369,9 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
         });
     }
 
-    private registerDelayRequesst (requestTimeoutByHost:delayTriggerTimeByHost):void{
+    private registerDelayRequesst(requestTimeoutByHost: delayTriggerTimeByHost): void {
 
-        if(!requestTimeoutByHost){
+        if (!requestTimeoutByHost) {
             return;
         }
 
@@ -394,22 +423,59 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
         this.TaskCacheMap.set(task.id, result);
     }
 
-    private pushTaskDoneMap(id: symbol, result, type: 'success' | 'error') {
+    private pushTaskDoneMap(id: symbol, task: successTask<any, any> | errorTask<any, any>): void {
 
-        const handle = this.TaskDoneMap;
-        let initArray = [[], []];
-
-        if (handle.has(id)) {
-            initArray = handle.get(id);
-        } else {
-            handle.set(id, initArray as any);
+        function isSuccessType(x: any): x is successTask<any, any> {
+            return !!x.result;
         }
 
-        if (type == 'success') {
-            initArray[0].push(result);
+        const mapHandle = this.TaskDoneMap;
+        let InitArray = [[], []];
+
+        if (mapHandle.has(id)) {
+            InitArray = mapHandle.get(id);
         } else {
-            initArray[1].push(result);
+            mapHandle.set(id, InitArray as any);
         }
+
+        if (isSuccessType(task)) {
+            InitArray[0].push(task);
+        } else {
+            InitArray[1].push(task);
+        }
+
+    }
+
+    private pushSuccessTask(task: TaskInRequestManager, result): void {
+
+        function mixin(task: TaskInRequestManager): successTask<any, any> {
+            return {
+                taskName: task.taskName,
+                hostName: task.hostName,
+                result: result,
+                query: task.query,
+                queryUrl: task.queryUrl
+            };
+        }
+
+        this.pushTaskDoneMap(task.id, mixin(task));
+
+    }
+
+    private pushErrorTask(task: TaskInRequestManager, result): void {
+
+        function mixin(task: TaskInRequestManager): errorTask<any, any> {
+            return {
+                taskName: task.taskName,
+                hostName: task.hostName,
+                error: result,
+                query: task.query,
+                queryUrl: task.queryUrl
+            };
+        }
+
+        this.pushTaskDoneMap(task.id, mixin(task));
+
     }
 
     /**
@@ -466,9 +532,9 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
         task.state = state;
     }
 
-    setTaskStates(tasks:TaskInRequestManager[],state:'cached' | 'init' | 'request' | 'wait' | 'done'){
+    setTaskStates(tasks: TaskInRequestManager[], state: 'cached' | 'init' | 'request' | 'wait' | 'done') {
         for (const task of tasks) {
-            this.setTaskStatus(task,state);
+            this.setTaskStatus(task, state);
         }
     }
 
@@ -504,7 +570,7 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
         }
 
         // 设置默认状态
-        this.setTaskStates(tasks,'init');
+        this.setTaskStates(tasks, 'init');
 
         return tasks;
     }
@@ -522,7 +588,7 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
             const result = this.TaskDoneMap.get(id);
             this.TaskCacheMap.delete(id);
             this.TaskDoneMap.delete(id);
-            this.emit(id,result);
+            this.emit(id, result);
         }
 
     }
@@ -615,10 +681,10 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
 
         let len = positiveMin(spaceOfHost, spaceofModule, spaceOfglobal, tasks.length);
 
-        reverseIteration(tasks,len,(task)=>{
-            if(task.state == 'init'){
+        reverseIteration(tasks, len, (task) => {
+            if (task.state == 'init') {
                 result.push(task);
-                this.setTaskStatus(task,'wait');
+                this.setTaskStatus(task, 'wait');
             }
         });
 
@@ -676,6 +742,7 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
 
 
         function settingModule(task: TaskInRequestManager, module: standardRequset<hostNameConfig>): standardRequset<hostNameConfig> {
+
             if (task.queryUrl) {
                 module.useQueryOfUrl(task.queryUrl);
             }
@@ -685,11 +752,7 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
             }
 
             if (task.proxy) {
-                if (typeof task.proxy == 'string') {
-                    module.setProxy(task.proxy);
-                } else {
-                    module.setProxy();
-                }
+                module.setProxy();
             }
 
             if (task.options) {
@@ -702,39 +765,42 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
         settingModule(task, module);
 
         const parseFunction: (data: responseType) => successType | boolean = task.parseFunction,
-            that = this,
-            id = task.id;
+            that = this;
 
-        function then(htmlString: responseType) {
 
-            if (parseFunction) {
-
-                try {
-                    
-                    const result = parseFunction(htmlString);
-                    
-                    that.pushTaskDoneMap(id, result, 'success');
-                } catch (error) {
-                    
-                    that.pushTaskDoneMap(id, `Error:解析错误! 任务内容:${task},解析函数:${parseFunction},错误信息:error.`, 'error');
-                }
-
-            } else {
-
-                that.pushTaskDoneMap(id, htmlString, 'success');
-            }
+        function done() {
+            // 重置模块信息
             module.useHostConfig(hostName);
-
             // 触发内容完成
             that.emit('done', task);
         }
 
-        function error(error) {
-            that.pushTaskDoneMap(id, `Error:请求错误! ${error}`, 'error');
+        function then(data: responseType) {
 
-            module.useHostConfig(hostName);
-            // 触发内容完成
-            that.emit('done', task);
+            try {
+
+                let result = parseFunction ? parseFunction(data) : undefined;
+
+                if (result === false) {
+
+                    that.pushErrorTask(task, `Error:解析错误! 解析函数:${parseFunction}`);
+                    done();
+                    return;
+                }
+
+                that.pushSuccessTask(task, data);
+                done();
+            } catch (error) {
+
+                that.pushErrorTask(task, `Error:解析器错误! 错误信息:${error}`);
+                done();
+            }
+        }
+
+        function error(error) {
+
+            that.pushErrorTask(task,`Error:请求错误! ${error}`);
+            done();
         }
 
         module.request<Promise<responseType>>().then(then).catch(error);
@@ -802,11 +868,11 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
      *   返回一个Promise,Promise.then返回一个数组格式为[successType[],string[]]第一个数组包含所有的正确解析的内容,第二包含所有错误的内容
      * @param task 一组或者一个任务
      */
-    pushTask<responseType, successType>(task: Task<successType, responseType> | Task<successType, responseType>[]): Promise<responseArray<successType>> {
+    pushTask<responseType, successType>(task: Task<successType, responseType> | Task<successType, responseType>[]): Promise<responseContent<responseType,successType>> {
 
         task = Array.isArray(task) ? task : [task];
 
-        return new Promise<responseArray<successType>>((resolve, reject) => {
+        return new Promise<responseContent<responseType,successType>>((resolve, reject) => {
 
             if (!this.checkCachedTaskSpace(task)) {
                 reject(`Error:no space`);
@@ -824,7 +890,7 @@ export class RequestManagerPlusPlus extends RequestManagerBase {
 
             this.process<responseType, successType>();
 
-            this.once(id, (result: responseArray<successType>) => {
+            this.once(id, (result: responseContent<responseType,successType>) => {
 
                 resolve(result);
 

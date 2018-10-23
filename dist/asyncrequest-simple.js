@@ -27,25 +27,7 @@ function getRootPath(path) {
     }
     return result;
 }
-/**
- * 批量请求管理器返回一个Promise,提供一个pushTask方法用于添加请求任务
- *
- * 该任务的格式需要符合本文件提供的Task接口要求
- *
- * @param configOrigin 配置源如果是路径则从该路径中读取,如果是对象则直接使用
- * @param requestOptions 请求的配置
- */
-async function AsyncRequestSimple(configOrigin, requestOptions) {
-    let config;
-    if (typeof configOrigin == 'string') {
-        config = await getConfig(configOrigin);
-    }
-    else if (typeof configOrigin == 'object') {
-        config = configOrigin;
-    }
-    else {
-        throw "错误:请求配置源类型错误,configOrigin必须是string|configs";
-    }
+function getIntance(config, requestOptions) {
     rootPath = getRootPath(config.rootPath);
     // let rootPath = path.linux || path.win?path.linux || path.win:process.cwd();
     const modules = config['module'], configByHost = config['hostConfigs'], globalProxy = config['proxy'], requestTimeout = config['requestTimeoutByHost'];
@@ -59,5 +41,28 @@ async function AsyncRequestSimple(configOrigin, requestOptions) {
     }
     return new requestManagerCore_1.RequestManagerPlusPlus(standardRequestModuleInstance, requestOptions);
 }
+/**
+ * 批量请求管理器返回一个Promise,提供一个pushTask方法用于添加请求任务
+ *
+ * 该任务的格式需要符合本文件提供的Task接口要求
+ *
+ * @param configOrigin 配置源路径
+ * @param requestOptions 请求的配置
+ */
+async function AsyncRequestSimple(configOrigin, requestOptions) {
+    let config = await getConfig(configOrigin);
+    return getIntance(config, requestOptions);
+}
 exports.AsyncRequestSimple = AsyncRequestSimple;
+;
+/**
+ * 批量请求管理器AsyncRequestSimple的同步版本.
+ *
+ * @param configOrigin 基础配置对象
+ * @param requestOptions 请求配置对象
+ */
+function AsyncRequestSync(configOrigin, requestOptions) {
+    return getIntance(configOrigin, requestOptions);
+}
+exports.AsyncRequestSync = AsyncRequestSync;
 ;

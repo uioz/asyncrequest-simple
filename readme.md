@@ -174,7 +174,7 @@ interface Task<T, K> extends parseFuncction<T, K> {
 
 `asyncrequest-simple`接受这两种格式,并且返回一个Promise.
 
-方法使用如下:
+### pushTask方法定义如下:
 ```
    /**
      * 将任务元素压入内部的请求队列中,内部的将这些任务进行乱序请求
@@ -192,8 +192,35 @@ interface Task<T, K> extends parseFuncction<T, K> {
      *   返回一个Promise,Promise.then返回一个数组格式为[successType[],string[]]第一个数组包含所有的正确解析的内容,第二包含所有错误的内容
      * @param task 一组或者一个任务
      */
-pushTask<responseType, successType>(task: Task<successType, responseType> | Task<successType, responseType>[]): Promise<responseArray<successType>> {}
+pushTask<responseType, successType>(task: Task<successType, responseType> | Task<successType, responseType>[]): Promise<responseContent<responseType,successType>> {}
 ```
+
+### `Promise`中`then`返回说明
+
+返回详细格式如下(并非和内部完全一样但是属性完全一致):
+```
+// 成功相应的内容
+interface <successType>successTask {
+    taskName:string;
+    hostName:string;
+    queryUrl:string|string[]|undefined;
+    query:{[queryname:string]:string}|undefined;
+    result:successType;
+}
+// 失败相应的内容
+interface errorTask {
+    taskName:string;
+    hostName:string;
+    queryUrl:string|string[]|undefined;
+    query:{[queryname:string]:string}|undefined;
+    error:string;
+}
+
+type responseContent<successType> = [successTask<successType>[],errorTask[]]
+
+```
+简单的说他返回一个二维数组,`[0]`包含所有成功的信息`[1]`包含所有失败的信息.
+
 
 **注意**:该方法使用前一定要调用另外一个方法`checkCachedTaskSpace`(这就是第二个api)检测是否有剩余空间,否则内部的最大缓存数失效后就会有逻辑bug.
 
@@ -202,3 +229,9 @@ pushTask<responseType, successType>(task: Task<successType, responseType> | Task
 ## 起手和测试
 
 在test文件夹中的test.js中有该项目的使用测试,你可以在那里获取他的简单使用.
+
+你可以键入:
+```
+npm run test
+```
+运行这个小例子.

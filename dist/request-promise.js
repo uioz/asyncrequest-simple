@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("./types");
-const requestPromise = require("request-promise");
+const requestPromise = require('request-promise');
 class RequestPromise extends types_1.standardRequset {
     /**
      * 本请求包装模块包装的是request-promise,内部使用的模块名称也是如此'request-promise'

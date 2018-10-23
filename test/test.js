@@ -1,4 +1,4 @@
-const { default: AsyncRequestSimple } = require('../dist/asyncrequest-simple.js');
+const { AsyncRequestSync } = require('../dist/asyncrequest-simple.js');
 
 const InitConfig = {
     module: ['request-promise'],
@@ -47,6 +47,9 @@ const taskGroup = [
         query: {
             wd: '函数式编程'
         },
+        options: {
+            gzip: true
+        },
         parseFunction: (data) => {
             let pattern = new RegExp(/[\r|\n]/g);
             return data.replace(pattern, '');
@@ -54,10 +57,9 @@ const taskGroup = [
     }
 ]
 
+ function test() {
 
-async function test() {
-
-    const asyncRequestSimple = await AsyncRequestSimple(InitConfig);
+    const asyncRequestSimple = AsyncRequestSync(InitConfig);
 
     if (!asyncRequestSimple.checkCachedTaskSpace(taskGroup)) {
         console.log('缓存队列中没有足够的缓存空间');
