@@ -33,9 +33,9 @@ npm install
 
 # api
 
-由于使用TypeScript这里直接提供定义的类型文件即可.
+由于使用TypeScript这里只提供简单类型定义.
 
-入口文件使用:
+异步入口(导入配置文件):
 - 构建版本
 ```
 const {AsyncRequestSimple} = require('./dist/asyncrequest-simple.js');
@@ -49,13 +49,27 @@ const a = require('./dist/asyncrequest-simple.js').AsyncRequestSimple;
 import {AsyncRequestSimple} from './src/asyncrequest-simple';
 ```
 
-## 初始化
+同步入口(传入配置文件):
+- 构建版本
+```
+const {AsyncRequestSync} = require('./dist/asyncrequest-simple.js');
+
+// OR
+
+const a = require('./dist/asyncrequest-simple.js').AsyncRequestSync;
+```
+- TypeScript版本
+```
+import {AsyncRequestSync} from './src/asyncrequest-simple';
+```
+
+### 异步初始化
 ```
 import AsyncRequestSimple from './src/asyncrequest-simple';
 
 async function ready() {
 
-    const asyncRequestSimple = await AsyncRequestSimple(/*域名配置*/,/*请求配置*/);
+    const asyncRequestSimple = await AsyncRequestSimple(/*域名配置文件路径*/,/*请求配置*/);
 
 }
 
@@ -172,7 +186,7 @@ interface Task<T, K> extends parseFuncction<T, K> {
 
 接下来就相当简单了任务可以分为单个任务`single Task`和任务组`Task Group`,也就是一个任务对象和一个任务对象数组.
 
-`asyncrequest-simple`接受这两种格式,并且返回一个Promise.
+`pushTask`方法接受这两种格式,并且返回一个Promise.
 
 ### pushTask方法定义如下:
 ```
