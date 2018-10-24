@@ -3,7 +3,7 @@ import { ProxyDelayMethod } from './lib/proxyDelayMethod';
 import { DelayTriggerQueue } from './lib/delayTriggerQueue';
 import { reverseIteration } from "./lib/reverseIteration";
 import { requsetMoudleList } from "./requestInstance";
-import EventEmitter = require('events');
+const EventEmitter = require('events');
 
 
 /**
