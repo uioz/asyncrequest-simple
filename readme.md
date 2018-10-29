@@ -17,8 +17,6 @@
 - 不同域名下间隔请求时间设置
 - 最大并发请求数和最大缓存设置
 
-**注意**:该模块初始化的时候返回一个Promise.
-
 **注意**:个人项目不保证稳定性.
 
 # 安装和使用
@@ -49,7 +47,7 @@ const a = require('./dist/asyncrequest-simple.js').AsyncRequestSimple;
 import {AsyncRequestSimple} from './src/asyncrequest-simple';
 ```
 
-同步入口(传入配置文件):
+同步入口(传入配置对象):
 - 构建版本
 ```
 const {AsyncRequestSync} = require('./dist/asyncrequest-simple.js');
@@ -175,7 +173,7 @@ interface Task<T, K> extends parseFuncction<T, K> {
     // 在基础url上扩展的url内容例如www.baidu.com/s 基础url为www.baidu.com
     // 扩展在此处传入使用以下方法表示['s'] 或者 's'
     queryUrl?: string[] | string;
-    // 该属性下的所有属性都会挂载在请求模块上
+    // 该属性下的所有属性都会挂载在请求配置上
     options?: {
         [optionsName: string]: any;
     }
